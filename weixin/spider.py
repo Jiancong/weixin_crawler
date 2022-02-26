@@ -49,7 +49,11 @@ class Spider():
         # 全局更新Headers
         self.session.headers.update(self.headers)
         start_url = self.base_url + '?' + urlencode({'query': self.keyword, 'type': 2})
-        weixin_request = WeixinRequest(url=start_url, callback=self.parse_index, need_proxy=True)
+
+        print("start_url:", start_url)
+        print("self.parse_index:", self.parse_index)
+
+        weixin_request = WeixinRequest(url=start_url, callback=self.parse_index, need_proxy=False)
         # 调度第一个请求
         self.queue.add(weixin_request)
     
@@ -68,7 +72,7 @@ class Spider():
         next = doc('#sogou_next').attr('href')
         if next:
             url = self.base_url + str(next)
-            weixin_request = WeixinRequest(url=url, callback=self.parse_index, need_proxy=True)
+            weixin_request = WeixinRequest(url=url, callback=self.parse_index, need_proxy=False)
             yield weixin_request
     
     def parse_detail(self, response):
@@ -98,6 +102,7 @@ class Spider():
         try:
             if weixin_request.need_proxy:
                 proxy = self.get_proxy()
+                print("proxy:{}".format(proxy))
                 if proxy:
                     proxies = {
                         'http': 'http://' + proxy,
@@ -129,7 +134,8 @@ class Spider():
         while not self.queue.empty():
             weixin_request = self.queue.pop()
             callback = weixin_request.callback
-            print('Schedule', weixin_request.url)
+            print("weixin_request:", weixin_request)
+            print('Schedule:', weixin_request.url)
             response = self.request(weixin_request)
             if response and response.status_code in VALID_STATUSES:
                 results = list(callback(response))

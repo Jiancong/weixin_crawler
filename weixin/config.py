@@ -2,7 +2,7 @@ REDIS_HOST = 'localhost'
 
 REDIS_PORT = 6379
 
-REDIS_PASSWORD = 'foobared'
+REDIS_PASSWORD = '123456'
 
 REDIS_KEY = 'weixin'
 

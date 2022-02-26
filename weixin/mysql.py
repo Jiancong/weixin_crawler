@@ -14,7 +14,9 @@ class MySQL():
         :param database:
         """
         try:
-            self.db = pymysql.connect(host, username, password, database, charset='utf8', port=port)
+            #self.db = pymysql.connect(host, username, password, database, charset='utf8', port=port)
+            print("host:{}, user:{}, password:{}, db:{}".format(host, username, password, database))
+            self.db = pymysql.connect(host=host, user=username, password=password, db=database )
             self.cursor = self.db.cursor()
         except pymysql.MySQLError as e:
             print(e.args)

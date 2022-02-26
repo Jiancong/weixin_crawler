@@ -1,7 +1,8 @@
 from redis import StrictRedis
-from weixin.config import *
+#from weixin.config import *
 from pickle import dumps, loads
-from weixin.request import WeixinRequest
+#from weixin.request import WeixinRequest
+from request import WeixinRequest
 
 
 class RedisQueue():
@@ -9,7 +10,8 @@ class RedisQueue():
         """
         初始化Redis
         """
-        self.db = StrictRedis(host=REDIS_HOST, port=REDIS_PORT, password=REDIS_PASSWORD)
+        #self.db = StrictRedis(host=REDIS_HOST, port=REDIS_PORT, password=REDIS_PASSWORD)
+        self.db = StrictRedis(host="localhost", port=6379, password='123456')
 
     def add(self, request):
         """
@@ -19,7 +21,12 @@ class RedisQueue():
         :return: 添加结果
         """
         if isinstance(request, WeixinRequest):
-            return self.db.rpush(REDIS_KEY, dumps(request))
+            print("RedisQueue::add::request:", request)
+            in_val=dumps(request)
+            print("RedisQueue::add::dumps(request):", in_val)
+            #return self.db.rpush(REDIS_KEY, in_val)
+            print("key len in nosdql:", self.db.llen('weixin'))
+            return self.db.rpush('weixin', in_val)
         return False
 
     def pop(self):
@@ -27,16 +34,20 @@ class RedisQueue():
         取出下一个Request并反序列化
         :return: Request or None
         """
-        if self.db.llen(REDIS_KEY):
-            return loads(self.db.lpop(REDIS_KEY))
+        #if self.db.llen(REDIS_KEY):
+        print("key len in nos:", self.db.llen('weixin'))
+        if self.db.llen('weixin'):
+            ret_val = loads(self.db.lpop('weixin'))
+            print("RedisQueue::pop::lpop:", ret_val)
+            return ret_val
         else:
             return False
 
     def clear(self):
-        self.db.delete(REDIS_KEY)
+        self.db.delete('weixin')
 
     def empty(self):
-        return self.db.llen(REDIS_KEY) == 0
+        return self.db.llen('weixin') == 0
 
 
 if __name__ == '__main__':
